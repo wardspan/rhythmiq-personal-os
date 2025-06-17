@@ -210,9 +210,13 @@ You have access to the user's current context:"""
         ).limit(3).all()
         
         # Get recent ideas
-        recent_ideas = self.db.query(Idea).filter(
-            Task.user_id == self.user_id
-        ).order_by(Idea.created_at.desc()).limit(5).all()
+        recent_ideas = (
+            self.db.query(Idea)
+            .filter(Idea.user_id == self.user_id)
+            .order_by(Idea.created_at.desc())
+            .limit(5)
+            .all()
+        )
         
         # Get chaos level
         from services.chaos_detection import ChaosDetectionService
