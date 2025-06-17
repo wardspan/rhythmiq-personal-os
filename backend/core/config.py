@@ -18,6 +18,22 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = None
     ANTHROPIC_API_KEY: Optional[str] = None
     
+    # OpenWeather API Key
+    OPENWEATHER_API_KEY: Optional[str] = None
+    OPENWEATHER_BASE_URL: str = "http://api.openweathermap.org/data/2.5"
+    
+    # Default location (Dedham, MA)
+    DEFAULT_LATITUDE: float = 42.2477
+    DEFAULT_LONGITUDE: float = -71.1611
+    DEFAULT_LOCATION: str = "Dedham, MA"
+    
+    # WHOOP Integration
+    WHOOP_CLIENT_ID: Optional[str] = None
+    WHOOP_CLIENT_SECRET: Optional[str] = None
+    WHOOP_REDIRECT_URI: Optional[str] = None
+    WHOOP_BASE_URL: Optional[str] = None
+    WHOOP_SCOPE: Optional[str] = None
+    
     # CORS
     ALLOWED_HOSTS: List[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
     
@@ -37,3 +53,6 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 settings = Settings()
+
+def get_settings():
+    return settings
