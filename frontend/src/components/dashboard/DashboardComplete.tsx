@@ -50,53 +50,6 @@ export default function DashboardComplete() {
             
             {/* Additional Status Cards */}
             <div className="space-y-4">
-              
-              {/* System Health Summary */}
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                <h3 className="text-lg font-medium text-slate-800 mb-4">Quick Status</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                      <span className="text-sm text-slate-600">API Services</span>
-                    </div>
-                    <span className="text-xs text-green-600 font-medium">Online</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                      <span className="text-sm text-slate-600">Database</span>
-                    </div>
-                    <span className="text-xs text-green-600 font-medium">Connected</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                      <span className="text-sm text-slate-600">WHOOP Sync</span>
-                    </div>
-                    <span className="text-xs text-yellow-600 font-medium">Ready</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                      <span className="text-sm text-slate-600">Automation</span>
-                    </div>
-                    <span className="text-xs text-blue-600 font-medium">Active</span>
-                  </div>
-                </div>
-                
-                <div className="mt-4 pt-3 border-t border-slate-100">
-                  <button 
-                    onClick={() => window.open('http://localhost:5678', '_blank')}
-                    className="w-full text-center text-xs text-blue-600 hover:text-blue-800 transition-colors"
-                  >
-                    Open n8n Console →
-                  </button>
-                </div>
-              </div>
 
               {/* AI Assistant Quick Access */}
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
@@ -147,24 +100,6 @@ export default function DashboardComplete() {
         {/* System Status Footer */}
         <SystemStatusFooter />
 
-        {/* Integration Status Bar */}
-        <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-4 px-6 py-3 bg-white rounded-full shadow-sm border border-slate-200">
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span>Health Integration Active</span>
-            </div>
-            <div className="w-px h-4 bg-slate-200"></div>
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <span>AI Optimization Enabled</span>
-            </div>
-            <div className="w-px h-4 bg-slate-200"></div>
-            <div className="text-xs text-slate-400">
-              Rhythmiq Personal OS v1.0.0
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )

@@ -229,12 +229,17 @@ function SystemStatusFooter() {
                 <span className="text-slate-600">DB</span>
               </span>
               <span className="flex items-center space-x-1">
-                <span>{getStatusIcon(systemHealth.openweather.status)}</span>
-                <span className="text-slate-600">Weather</span>
+                <span>{getStatusIcon(systemHealth.whoop.status)}</span>
+                <span className="text-slate-600">WHOOP</span>
               </span>
               <span className="flex items-center space-x-1">
                 <span>{getStatusIcon(systemHealth.n8n.status)}</span>
                 <span className="text-slate-600">n8n</span>
+              </span>
+              <div className="w-px h-4 bg-slate-200"></div>
+              <span className="flex items-center space-x-1">
+                <span>🤖</span>
+                <span className="text-slate-600">AI Ready</span>
               </span>
             </div>
           </div>
@@ -361,21 +366,42 @@ function SystemStatusFooter() {
               </div>
             </div>
 
-            {/* System Actions */}
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <div className="text-xs text-slate-500">
-                Rhythmiq Personal OS v1.0.0 • Running in development mode
-              </div>
-              <div className="flex space-x-2">
+            {/* System Actions & Quick Access */}
+            <div className="mt-4 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-xs text-slate-500">
+                  Rhythmiq Personal OS v1.0.0 • Running in development mode
+                </div>
                 <button 
-                  onClick={() => window.open('http://localhost:5678', '_blank')}
-                  className="text-xs text-blue-600 hover:text-blue-800"
+                  onClick={() => window.location.reload()}
+                  className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
                 >
-                  Open n8n →
-                </button>
-                <button className="text-xs text-slate-400 hover:text-slate-600">
                   Refresh Status
                 </button>
+              </div>
+              
+              {/* Quick Actions Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <button 
+                  onClick={() => window.open('http://localhost:5678', '_blank')}
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-xs"
+                >
+                  <span>🔧</span>
+                  <span>Open n8n Console</span>
+                </button>
+                
+                <button 
+                  onClick={() => window.open('http://localhost:5678/workflow/ai-chat', '_blank')}
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg transition-colors text-xs"
+                >
+                  <span>🤖</span>
+                  <span>Start AI Chat</span>
+                </button>
+                
+                <div className="flex items-center justify-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-lg text-xs">
+                  <span>💚</span>
+                  <span>Health Integration {systemHealth.whoop.enabled ? 'Active' : 'Ready'}</span>
+                </div>
               </div>
             </div>
           </div>
