@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useWhoopHealth } from '../../hooks/useWhoop'
 
 interface WeatherData {
     temperature: number
@@ -16,18 +17,35 @@ function WeatherWidget() {
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { data: health } = useWhoopHealth()
 
   useEffect(() => {
+    let isMounted = true
+    
     const fetchWeather = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/v1/weather/current')
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
+        
+        const response = await fetch('http://localhost:8000/api/v1/weather/current', {
+          signal: controller.signal
+        })
+        clearTimeout(timeoutId)
+        
         if (!response.ok) throw new Error('Weather fetch failed')
         const data = await response.json()
-        setWeather(data)
-        setLoading(false)
+        
+        if (isMounted) {
+          setWeather(data)
+          setLoading(false)
+          setError(null)
+        }
       } catch (err) {
-        setError('Failed to load weather')
-        setLoading(false)
+        console.error('Weather fetch error:', err)
+        if (isMounted) {
+          setError('Failed to load weather')
+          setLoading(false)
+        }
       }
     }
 
@@ -35,7 +53,11 @@ function WeatherWidget() {
     
     // Refresh every 10 minutes to match backend cache
     const interval = setInterval(fetchWeather, 10 * 60 * 1000)
-    return () => clearInterval(interval)
+    
+    return () => {
+      isMounted = false
+      clearInterval(interval)
+    }
   }, [])
 
   if (loading) {
@@ -79,6 +101,54 @@ function WeatherWidget() {
   }
 
   const impactDisplay = getImpactDisplay(weather.air_quality_impact)
+
+  // Get health-based weather sensitivity insights
+  const getHealthWeatherInsights = () => {
+    if (!health || !health.whoop_connected) return null
+
+    const recovery = health.recovery_score || 0
+    const sleep = health.sleep_quality || 0
+    const temp = weather.temperature
+
+    // Low recovery makes people more sensitive to weather changes
+    if (recovery < 50) {
+      if (temp < 45 || temp > 85) {
+        return {
+          icon: '⚠️',
+          message: 'Weather may impact focus more when recovery is low',
+          suggestion: 'Consider indoor activities and stay hydrated',
+          color: 'text-orange-600',
+          bgColor: 'bg-orange-50'
+        }
+      }
+    }
+
+    // Good recovery with good weather
+    if (recovery >= 70 && temp >= 60 && temp <= 75 && !weather.description.toLowerCase().includes('rain')) {
+      return {
+        icon: '🌟',
+        message: 'Great conditions for outdoor activities',
+        suggestion: 'Perfect weather to complement your good recovery',
+        color: 'text-green-600',
+        bgColor: 'bg-green-50'
+      }
+    }
+
+    // Poor sleep quality makes weather changes more noticeable
+    if (sleep < 50 && (weather.humidity > 70 || weather.pressure < 29.5)) {
+      return {
+        icon: '💤',
+        message: 'High humidity/low pressure may worsen fatigue',
+        suggestion: 'Extra rest breaks recommended today',
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-50'
+      }
+    }
+
+    return null
+  }
+
+  const healthInsight = getHealthWeatherInsights()
 
   // Convert weather icon code to emoji (simple mapping)
   const getWeatherEmoji = (iconCode: string) => {
@@ -141,6 +211,20 @@ function WeatherWidget() {
         </div>
       </div>
 
+      {/* Health-Based Weather Insights */}
+      {healthInsight && (
+        <div className={`${healthInsight.bgColor} rounded-lg p-3 mb-3`}>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm">{healthInsight.icon}</span>
+            <span className={`text-xs font-medium ${healthInsight.color}`}>
+              Health + Weather Insight
+            </span>
+          </div>
+          <div className="text-xs text-slate-700 mb-1">{healthInsight.message}</div>
+          <div className="text-xs text-slate-600">{healthInsight.suggestion}</div>
+        </div>
+      )}
+
       {/* Enhanced Cognitive Impact Indicator */}
       <div className="border-t border-slate-100 pt-3">
         <div className="flex items-center justify-between">
@@ -150,9 +234,16 @@ function WeatherWidget() {
               {impactDisplay.text}
             </span>
           </div>
-          <button className="text-xs text-slate-400 hover:text-slate-600">
-            Why?
-          </button>
+          <div className="flex items-center gap-2">
+            {health?.whoop_connected && (
+              <div className="text-xs text-slate-400">
+                Recovery: {health.recovery_score || '--'}%
+              </div>
+            )}
+            <button className="text-xs text-slate-400 hover:text-slate-600">
+              Why?
+            </button>
+          </div>
         </div>
       </div>
     </div>

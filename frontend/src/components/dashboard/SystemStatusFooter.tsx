@@ -26,60 +26,84 @@ function SystemStatusFooter() {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
 
   useEffect(() => {
+    let isMounted = true
+
     const checkSystemHealth = async () => {
-      const checks = {
-        api: checkAPI(),
-        database: checkDatabase(),
-        redis: checkRedis(),
-        n8n: checkN8N(),
-        openweather: checkOpenWeather(),
-        openai: checkOpenAI(),
-        anthropic: checkAnthropic(),
-        whoop: checkWhoop()
+      try {
+        const checks = [
+          checkAPI(),
+          checkDatabase(),
+          checkRedis(),
+          checkN8N(),
+          checkOpenWeather(),
+          checkOpenAI(),
+          checkAnthropic(),
+          checkWhoop()
+        ]
+
+        const results = await Promise.allSettled(checks)
+
+        if (!isMounted) return
+
+        setSystemHealth({
+          api: results[0].status === 'fulfilled' ? results[0].value : { status: 'error' },
+          database: results[1].status === 'fulfilled' ? results[1].value : { status: 'error' },
+          redis: results[2].status === 'fulfilled' ? results[2].value : { status: 'error' },
+          n8n: results[3].status === 'fulfilled' ? results[3].value : { status: 'error' },
+          openweather: results[4].status === 'fulfilled' ? results[4].value : { status: 'error' },
+          openai: results[5].status === 'fulfilled' ? results[5].value : { status: 'unknown', enabled: false },
+          anthropic: results[6].status === 'fulfilled' ? results[6].value : { status: 'unknown', enabled: false },
+          whoop: results[7].status === 'fulfilled' ? results[7].value : { status: 'unknown', enabled: false }
+        })
+
+        setLastUpdated(new Date())
+      } catch (error) {
+        console.error('System health check failed:', error)
+        if (isMounted) {
+          setSystemHealth({
+            api: { status: 'error' },
+            database: { status: 'error' },
+            redis: { status: 'error' },
+            n8n: { status: 'error' },
+            openweather: { status: 'error' },
+            openai: { status: 'unknown', enabled: false },
+            anthropic: { status: 'unknown', enabled: false },
+            whoop: { status: 'unknown', enabled: false }
+          })
+        }
       }
-
-      const results = await Promise.allSettled([
-        checks.api,
-        checks.database,
-        checks.redis,
-        checks.n8n,
-        checks.openweather,
-        checks.openai,
-        checks.anthropic,
-        checks.whoop
-      ])
-
-      setSystemHealth({
-        api: results[0].status === 'fulfilled' ? results[0].value : { status: 'error' },
-        database: results[1].status === 'fulfilled' ? results[1].value : { status: 'error' },
-        redis: results[2].status === 'fulfilled' ? results[2].value : { status: 'error' },
-        n8n: results[3].status === 'fulfilled' ? results[3].value : { status: 'error' },
-        openweather: results[4].status === 'fulfilled' ? results[4].value : { status: 'error' },
-        openai: results[5].status === 'fulfilled' ? results[5].value : { status: 'unknown', enabled: false },
-        anthropic: results[6].status === 'fulfilled' ? results[6].value : { status: 'unknown', enabled: false },
-        whoop: results[7].status === 'fulfilled' ? results[7].value : { status: 'unknown', enabled: false }
-      })
-
-      setLastUpdated(new Date())
     }
 
     checkSystemHealth()
     const interval = setInterval(checkSystemHealth, 30000) // Check every 30 seconds
 
-    return () => clearInterval(interval)
+    return () => {
+      isMounted = false
+      clearInterval(interval)
+    }
   }, [])
 
   // Individual health check functions
   const checkAPI = async () => {
     const start = Date.now()
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5s timeout
+    
     try {
-      const response = await fetch('http://localhost:8000/api/v1/health')
+      const response = await fetch('http://localhost:8000/api/v1/health', {
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
       const responseTime = Date.now() - start
       if (response.ok) {
         return { status: 'connected', responseTime }
       }
       return { status: 'error', responseTime }
-    } catch {
+    } catch (error) {
+      clearTimeout(timeoutId)
+      if (error instanceof Error && error.name === 'AbortError') {
+        return { status: 'timeout', responseTime: 5000 }
+      }
       return { status: 'error', responseTime: Date.now() - start }
     }
   }
