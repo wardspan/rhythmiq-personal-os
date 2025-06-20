@@ -33,7 +33,7 @@ export default function DashboardComplete() {
               <WeatherWidget />
             </div>
             
-            {/* Middle Row - Health and Focus */}
+            {/* Middle Row - Health and MITs */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <HealthWidgetFixed />
               <MITWidget />

@@ -148,7 +148,7 @@ export default function MITWidget() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-medium text-slate-800">Today's Focus</h3>
+          <h3 className="text-lg font-medium text-slate-800">MITs (Most Important Tasks)</h3>
           <span className="text-sm text-slate-500">({completedToday}/{totalMits})</span>
         </div>
         <button

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useWhoopHealth } from '../../hooks/useWhoop'
+import TaskManagerModal from './TaskManagerModal'
 
 interface Task {
   id: string
@@ -22,6 +23,7 @@ export default function TaskWidget() {
   const [tasks, setTasks] = useState<TaskData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showTaskManager, setShowTaskManager] = useState(false)
   const { data: health } = useWhoopHealth()
 
   useEffect(() => {
@@ -45,6 +47,27 @@ export default function TaskWidget() {
     const interval = setInterval(fetchTasks, 5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
+
+  const handleTaskUpdate = async (taskId: string, updates: Partial<Task>) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/v1/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      })
+      
+      if (response.ok) {
+        // Refresh tasks after update
+        const taskResponse = await fetch('http://localhost:8000/api/v1/tasks?limit=10')
+        if (taskResponse.ok) {
+          const data = await taskResponse.json()
+          setTasks(data)
+        }
+      }
+    } catch (error) {
+      console.error('Error updating task:', error)
+    }
+  }
 
   // Generate health-based task recommendations
   const getHealthBasedRecommendations = () => {
@@ -156,8 +179,17 @@ export default function TaskWidget() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-slate-800">Smart Task Planner</h3>
-        <div className="text-xs text-slate-500">
-          {completedToday} done • {totalTasks} remaining
+        <div className="flex items-center gap-3">
+          <div className="text-xs text-slate-500">
+            {completedToday} done • {totalTasks} remaining
+          </div>
+          <button
+            onClick={() => setShowTaskManager(true)}
+            className="px-3 py-1 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors"
+            title="Open full task manager"
+          >
+            📋 Manage
+          </button>
         </div>
       </div>
 
@@ -263,6 +295,13 @@ export default function TaskWidget() {
           </div>
         </div>
       )}
+
+      {/* Task Manager Modal */}
+      <TaskManagerModal
+        isOpen={showTaskManager}
+        onClose={() => setShowTaskManager(false)}
+        onTaskUpdate={handleTaskUpdate}
+      />
     </div>
   )
 }
