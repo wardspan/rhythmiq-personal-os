@@ -6,19 +6,54 @@ import MITWidget from './MITWidget'
 import TaskWidget from './TaskWidget'
 import ActionButtons from './ActionButtons'
 import SystemStatusFooter from './SystemStatusFooter'
+import { ModalLauncherComponent, useModalControls } from '../shared/ModalManager'
 
 export default function DashboardComplete() {
+  const modalControls = useModalControls()
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">
-            Rhythmiq Personal OS
-          </h1>
-          <p className="text-slate-600">
-            Your personalized productivity dashboard with health-optimized insights
-          </p>
+        {/* Header with Modal Launcher */}
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-800 mb-2">
+              Rhythmiq Personal OS
+            </h1>
+            <p className="text-slate-600">
+              Your personalized productivity dashboard with health-optimized insights
+            </p>
+          </div>
+          
+          {/* Modal Launcher */}
+          <div className="flex items-center gap-3">
+            <ModalLauncherComponent />
+            
+            {/* Quick Launch Buttons */}
+            <div className="flex gap-2">
+              <button
+                onClick={modalControls.openTaskManager}
+                className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-sm"
+                title="Open Task Manager"
+              >
+                📋
+              </button>
+              <button
+                onClick={modalControls.openAIAssistant}
+                className="px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg transition-colors text-sm"
+                title="Open AI Assistant"
+              >
+                🤖
+              </button>
+              <button
+                onClick={modalControls.openSystemStatus}
+                className="px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors text-sm"
+                title="Open System Status"
+              >
+                ⚡
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Main Grid Layout */}
